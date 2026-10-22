@@ -36,7 +36,7 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    fetch("/themes.json", { cache: "no-store" })
+    fetch("themes.json", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((j) => { if (alive && j?.themes?.length) setThemes(j.themes); })
       .catch(() => { /* single-file hosting: fall back to Saloon theme */ });
@@ -131,7 +131,7 @@ export default function App() {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch(() => {});
+        navigator.serviceWorker.register("sw.js").catch(() => {});
       });
     }
   }, []);

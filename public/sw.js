@@ -1,8 +1,9 @@
 /* Deluxe Saloon service worker — free, no dependencies.
-   Strategy: precache shell; navigations network-first → cached /;
-   icons+manifest network-first; other same-origin GETs cache-first. */
-const CACHE = "deluxe-saloon-v1";
-const SHELL = ["/", "/index.html", "/manifest.json", "/themes.json", "/img/icon-512.png", "/img/hero-desktop.jpg", "/img/hero-mobile.jpg"];
+   Strategy: precache shell; navigations network-first → cached entry;
+   icons+manifest network-first; other same-origin GETs cache-first.
+   All URLs are relative to the SW scope, so it works from any sub-path. */
+const CACHE = "deluxe-saloon-v2";
+const SHELL = ["./", "index.html", "manifest.json", "themes.json", "img/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -33,10 +34,12 @@ self.addEventListener("fetch", (e) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("/", copy)).catch(() => {});
+          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
           return res;
         })
-        .catch(() => caches.match("/").then((r) => r || caches.match("/index.html")))
+        .catch(() =>
+          caches.match("index.html").then((r) => r || caches.match("./"))
+        )
     );
     return;
   }
