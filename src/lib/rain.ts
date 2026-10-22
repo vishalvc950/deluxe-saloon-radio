@@ -1,7 +1,7 @@
 /* =====================================================================
    🌧️ BAARISH ENGINE — canvas rain + lightning, all audio synthesized
    live with the Web Audio API (zero audio files, zero APIs).
-   • brown-noise loop → lowpass 1000 Hz = rain (1.2 s fade-in)
+   • pink-noise 10 s seamless loop → highpass 220 + lowpass 5400 = rain (1.2 s fade-in)
    • sawtooth 80→25 Hz + lowpass + noise crack = thunder
    • random lightning every 5–14 s: 3-stage screen flash + jagged bolt
    ===================================================================== */
@@ -67,25 +67,44 @@ export class RainEngine {
     this.master.gain.value = 1;
     this.master.connect(this.ac.destination);
 
-    // brown noise → lowpass 1000 Hz = rain bed
-    const len = this.ac.sampleRate * 2;
-    const buf = this.ac.createBuffer(1, len, this.ac.sampleRate);
-    const data = buf.getChannelData(0);
-    let last = 0;
-    for (let i = 0; i < len; i++) {
+    // rain bed: pink noise, 10 s loop, equal-power crossfade → seamless wrap
+    const X = Math.floor(this.ac.sampleRate * 0.5); // crossfade tail
+    const N = Math.floor(this.ac.sampleRate * 10); // 10 s loop length
+    const gen = new Float32Array(N + X);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < N + X; i++) {
       const white = Math.random() * 2 - 1;
-      last = (last + 0.02 * white) / 1.02;
-      data[i] = last * 3.2;
+      b0 = 0.99886 * b0 + white * 0.0555179;
+      b1 = 0.99332 * b1 + white * 0.0750759;
+      b2 = 0.969 * b2 + white * 0.153852;
+      b3 = 0.8665 * b3 + white * 0.3104856;
+      b4 = 0.55 * b4 + white * 0.5329522;
+      b5 = -0.7616 * b5 - white * 0.016898;
+      gen[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+      b6 = white * 0.115926;
     }
+    // blend gen[N..] (which continues gen[N-1]) into the head: constant power,
+    // so out[N-1] → out[0] is continuous — no click, no audible loop cycle
+    const buf = this.ac.createBuffer(1, N, this.ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < X; i++) {
+      const t = (i / X) * (Math.PI / 2);
+      data[i] = gen[N + i] * Math.cos(t) + gen[i] * Math.sin(t);
+    }
+    data.set(gen.subarray(X, N), X);
+
     const src = this.ac.createBufferSource();
     src.buffer = buf;
     src.loop = true;
+    const hp = this.ac.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 220;
     const lp = this.ac.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.value = 1000;
+    lp.frequency.value = 5400;
     this.rainGain = this.ac.createGain();
     this.rainGain.gain.value = 0;
-    src.connect(lp).connect(this.rainGain).connect(this.master);
+    src.connect(hp).connect(lp).connect(this.rainGain).connect(this.master);
     src.start();
     // 1.2 s fade-in
     this.rainGain.gain.linearRampToValueAtTime(0.32, this.ac.currentTime + 1.2);
