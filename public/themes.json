@@ -1,0 +1,11 @@
+{
+  "themes": [
+    { "id": "saloon", "emoji": "✂️", "label": "Deluxe Salon", "path": "/", "accent": "#f59e0b", "accentSoft": "#fbbf24", "tagline": "EST. 2000 · RADIO", "titleHi": "डीलक्स सैलून", "titleEn": "Deluxe Saloon" },
+    { "id": "busdriver", "emoji": "🚌", "label": "Bus Driver", "path": "/busdriver", "accent": "#fb923c", "accentSoft": "#fdba74", "tagline": "NH-48 · NIGHT SERVICE", "titleHi": "बस ड्राइवर", "titleEn": "Bus Driver" },
+    { "id": "bhojpuri", "emoji": "🦬", "label": "Bhojpuri Bangers", "path": "/bhojpuri", "accent": "#ef4444", "accentSoft": "#fca5a5", "tagline": "DESI TAADKA · FULL VOLUME", "titleHi": "भोजपुरी बैंकर्स", "titleEn": "Bhojpuri Bangers" },
+    { "id": "bartantime", "emoji": "🫧", "label": "Bartan Time", "path": "/bartantime", "accent": "#38bdf8", "accentSoft": "#7dd3fc", "tagline": "GOLDEN HOUR · KITCHEN RADIO", "titleHi": "बर्तन टाइम", "titleEn": "Bartan Time" },
+    { "id": "rajumistri", "emoji": "🏠", "label": "Raju Mistri", "path": "/rajumistri", "accent": "#a3a3a3", "accentSoft": "#d4d4d4", "tagline": "SITE PE CHAI · 2005", "titleHi": "राजू मिस्त्री", "titleEn": "Raju Mistri" },
+    { "id": "papa", "emoji": "👨", "label": "Papa Ke Gaane", "path": "/papa", "accent": "#eab308", "accentSoft": "#fde047", "tagline": "MARUTI 800 · SUNDAY MORNING", "titleHi": "पापा के गाने", "titleEn": "Papa Ke Gaane" },
+    { "id": "corporatemajdoor", "emoji": "💻", "label": "Corporate Majdoor", "path": "/corporatemajdoor", "accent": "#22d3ee", "accentSoft": "#67e8f9", "tagline": "CAB AT 9:47 PM", "titleHi": "कॉर्पोरेट मजदूर", "titleEn": "Corporate Majdoor" }
+  ]
+}
