@@ -9,14 +9,13 @@ export const APP_VERSION = "1.0.0";
 /**
  * 🎵 EDIT HERE — YouTube playlist that powers the radio.
  * Audio streams through YouTube's free IFrame Player API; nothing is hosted.
- * Default = the real "Deluxe Salon" playlist used by deluxsalon.in.
  */
 export const PLAYLIST_ID = "PLVFLMYM1tErk";
 
 export const SITE = {
   name: "Deluxe Saloon",
   nameHi: "डीलक्स सैलून",
-  url: "https://deluxsalon.in",
+  url: "https://vishalvc950.github.io/deluxe-saloon-radio/",
   contact: "Vishalvc950@gmail.com",
   playlistUrl: `https://www.youtube.com/playlist?list=${PLAYLIST_ID}`,
 };

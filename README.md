@@ -2,9 +2,9 @@
 
 A free **2000s Indian retro ambient saloon radio** — the feeling of sitting in a
 neighbourhood barbershop with a battered radio playing nonstop 2000s Bollywood hits,
-the buzz of clippers and the barber's one-liners. Rebuilt as a deployable static PWA.
+the buzz of clippers and the barber's one-liners. Ships as a deployable static PWA.
 
-Also spelled **Deluxe Salon** / **Delux Salon** · inspired by deluxsalon.in.
+Also spelled **Deluxe Salon** / **Delux Salon**.
 
 **Zero paid services.** Everything runs on free tiers: YouTube IFrame Player API,
 img.youtube.com thumbnails, Google Fonts, api.qrserver.com QR, WhatsApp click-to-share,

@@ -15,17 +15,17 @@ import { SITE, WHATSAPP_CHANNEL, INSTAGRAM_URL } from "../config";
 
 const FAQS = [
   ["What is Deluxe Saloon?",
-   "Deluxe Saloon — also written Deluxe Salon or Delux Salon — is a free ambient radio website at deluxsalon.in that recreates the sound and mood of a classic 2000s Indian neighbourhood barbershop, complete with nostalgic Bollywood tunes and barber chatter."],
+   "Deluxe Saloon — also written Deluxe Salon or Delux Salon — is a free ambient radio website that recreates the sound and mood of a classic 2000s Indian neighbourhood barbershop, complete with nostalgic Bollywood tunes and barber chatter."],
   ["Is Deluxe Saloon free to use?",
    "Yes. Deluxe Saloon streams entirely for free in your browser, with no sign-up required, on both desktop and mobile."],
   ["What kind of music plays on Deluxe Saloon?",
    "Deluxe Saloon plays a curated 2000s Indian Bollywood playlist — the kind of songs you'd have heard on the radio inside a saloon back then. The same playlist is also available on YouTube, linked in the footer below."],
-  ["Is deluxsalon.in the official Deluxe Salon website?",
-   "Yes. deluxsalon.in is the Deluxe Salon website — home to the Deluxe Saloon ambient radio experience, its full library of 2000s Bollywood tracks, and the retro barbershop artwork and quotes that go with it."],
+  ["Is Deluxe Saloon available on mobile?",
+   "Yes. Deluxe Saloon works in any modern browser on phone or desktop, and can be installed as an app straight from the browser — no store, no sign-up."],
   ["Where can I listen to the Deluxe Salon songs?",
-   "All the Deluxe Salon songs stream directly in your browser at deluxsalon.in — just press play, no download or sign-up needed. The same tracks are also on YouTube, linked in the footer."],
+   "All the Deluxe Salon songs stream directly in your browser right here — just press play, no download or sign-up needed. The same tracks are also on YouTube, linked in the footer."],
   ["Is there a Deluxe Salon playlist I can follow?",
-   "Yes. The Deluxe Salon playlist plays automatically in shuffle on deluxsalon.in, and you can follow the same playlist on YouTube via the link in the footer."],
+   "Yes. The Deluxe Salon playlist plays automatically in shuffle right here, and you can follow the same playlist on YouTube via the link in the footer."],
 ] as const;
 
 const CARDS = [
@@ -46,16 +46,16 @@ export default function Sections({ onOpenSupport }: { onOpenSupport: () => void 
             <span className="h-px w-8 bg-accent-soft/60" /> Welcome to <span className="h-px w-8 bg-accent-soft/60" />
           </p>
           <h2 className="font-display text-3xl xs:text-4xl md:text-[2.6rem] text-cream mt-4 leading-tight">
-            Deluxe Saloon — a 2000s Indian Saloon,<br className="hidden sm:block" /> Rebuilt in Sound
+            Deluxe Saloon — a 2000s Indian Saloon,<br className="hidden sm:block" /> Alive in Sound
           </h2>
           <p className="mt-6 text-[14px] leading-relaxed text-cream/80">
             Deluxe Saloon (also spelled <strong className="text-cream">Deluxe Salon</strong> or{" "}
-            <strong className="text-cream">Delux Salon</strong>) is a free ambient radio built at{" "}
-            <a className="link-amber" href={SITE.url}>deluxsalon.in</a> to recreate one very specific
-            memory: the neighbourhood hair-cutting saloon of 2000s India, with a battered radio in the
-            corner playing Bollywood hits between the buzz of clippers and the snip of scissors. Press
-            play, and Deluxe Saloon streams a nonstop mix of 2000s Bollywood radio nostalgia, styled
-            around the sights, sounds and one-liners of a classic Indian barbershop.
+            <strong className="text-cream">Delux Salon</strong>) is a free ambient radio built to
+            recreate one very specific memory: the neighbourhood hair-cutting saloon of 2000s India,
+            with a battered radio in the corner playing Bollywood hits between the buzz of clippers
+            and the snip of scissors. Press play, and Deluxe Saloon streams a nonstop mix of 2000s
+            Bollywood radio nostalgia, styled around the sights, sounds and one-liners of a classic
+            Indian barbershop.
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export default function Sections({ onOpenSupport }: { onOpenSupport: () => void 
                 <span className="pill text-[8px] tracking-[0.2em] font-bold text-accent-soft border border-accent/30 bg-accent/10 px-2 py-1">NOSTALGIA RADIO</span>
               </p>
               <p className="mt-2 text-[12px] text-mute">
-                Deluxe Salon Playlist · <a className="link-amber" href={SITE.url}>deluxsalon.in</a>
+                Deluxe Salon Playlist · <a className="link-amber" href={SITE.url}>vishalvc950.github.io</a>
               </p>
               <p className="mt-1 text-[11px] text-mute/70 max-w-sm">
                 Capturing the lazy afternoon drone, warm mirrors, and chai-stained radio cassettes of neighbourhood India.
