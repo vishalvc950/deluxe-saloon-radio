@@ -2,7 +2,7 @@
    Strategy: precache shell; navigations network-first → cached entry;
    icons+manifest network-first; other same-origin GETs cache-first.
    All URLs are relative to the SW scope, so it works from any sub-path. */
-const CACHE = "deluxe-saloon-v2";
+const CACHE = "deluxe-saloon-v3";
 const SHELL = ["./", "index.html", "manifest.json", "themes.json", "img/icon-512.png"];
 
 self.addEventListener("install", (e) => {
