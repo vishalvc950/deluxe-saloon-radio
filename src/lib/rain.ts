@@ -1,7 +1,9 @@
 /* =====================================================================
-   🌧️ BAARISH ENGINE — canvas rain + lightning, all audio synthesized
-   live with the Web Audio API (zero audio files, zero APIs).
-   • pink-noise 10 s seamless loop → highpass 220 + lowpass 5400 = rain (1.2 s fade-in)
+   🌧️ BAARISH ENGINE — canvas rain + lightning, Web Audio.
+   • rain bed = public/rain.mp3 (Mixkit thunderstorm), fetched + decoded,
+     baked into a seamless 1.5 s equal-power crossfade loop, 1.2 s fade-in
+   • if the fetch/decode fails (offline, first visit) it falls back to a
+     live pink-noise 10 s loop → highpass 220 + lowpass 5400
    • sawtooth 80→25 Hz + lowpass + noise crack = thunder
    • random lightning every 5–14 s: 3-stage screen flash + jagged bolt
    ===================================================================== */
@@ -28,6 +30,8 @@ export class RainEngine {
   private ac: AudioContext | null = null;
   private master: GainNode | null = null;
   private rainGain: GainNode | null = null;
+  private rainSrc: AudioBufferSourceNode | null = null;
+  private gen = 0;
 
   constructor(canvas: HTMLCanvasElement, flashEl: HTMLDivElement) {
     this.canvas = canvas;
@@ -65,11 +69,78 @@ export class RainEngine {
     this.ac = new AC();
     this.master = this.ac.createGain();
     this.master.gain.value = 1;
-    this.master.connect(this.ac.destination);
+    // soft limiter: rain bed + thunder can overlap and exceed 0 dBFS
+    const lim = this.ac.createDynamicsCompressor();
+    lim.threshold.value = -6;
+    lim.knee.value = 6;
+    lim.ratio.value = 12;
+    lim.attack.value = 0.003;
+    lim.release.value = 0.25;
+    this.master.connect(lim).connect(this.ac.destination);
 
-    // rain bed: pink noise, 10 s loop, equal-power crossfade → seamless wrap
-    const X = Math.floor(this.ac.sampleRate * 0.5); // crossfade tail
-    const N = Math.floor(this.ac.sampleRate * 10); // 10 s loop length
+    // rain bed
+    this.rainGain = this.ac.createGain();
+    this.rainGain.gain.value = 0;
+    this.rainGain.connect(this.master);
+
+    // recorded thunderstorm, seamless loop → falls back to synthesized rain
+    const gen = ++this.gen;
+    void this.loadRainBed().then((ok) => {
+      if (!ok && gen === this.gen) this.synthRain();
+    });
+  }
+
+  /* recorded rain bed: public/rain.mp3 → crossfade-baked loop */
+  private async loadRainBed(): Promise<boolean> {
+    const gen = this.gen;
+    try {
+      const ac = this.ac;
+      if (!ac) return false;
+      const res = await fetch(new URL("rain.mp3", document.baseURI).href);
+      if (!res.ok) return false;
+      const raw = await ac.decodeAudioData(await res.arrayBuffer());
+      if (gen !== this.gen || !this.running || !this.ac || !this.master || !this.rainGain)
+        return false;
+      const src = this.ac.createBufferSource();
+      src.buffer = this.seamlessLoop(raw, this.ac);
+      src.loop = true;
+      src.connect(this.rainGain);
+      src.start();
+      this.rainSrc = src;
+      // 1.2 s fade-in
+      this.rainGain.gain.setValueAtTime(0, this.ac.currentTime);
+      this.rainGain.gain.linearRampToValueAtTime(0.6, this.ac.currentTime + 1.2);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /* bake a seamless loop: the tail (crossfade window) is blended into the
+     head at constant power, so out[L-1] → out[0] stays sample-continuous */
+  private seamlessLoop(raw: AudioBuffer, ac: AudioContext): AudioBuffer {
+    const X = Math.floor(raw.sampleRate * 1.5); // crossfade tail
+    const L = raw.length - X;
+    if (L <= X) return raw;
+    const out = ac.createBuffer(raw.numberOfChannels, L, raw.sampleRate);
+    for (let ch = 0; ch < raw.numberOfChannels; ch++) {
+      const d = raw.getChannelData(ch);
+      const o = out.getChannelData(ch);
+      for (let i = 0; i < X; i++) {
+        const t = (i / X) * (Math.PI / 2);
+        o[i] = d[L + i] * Math.cos(t) + d[i] * Math.sin(t);
+      }
+      o.set(d.subarray(X, L), X);
+    }
+    return out;
+  }
+
+  /* fallback: synthesized pink-noise rain (offline / failed fetch) */
+  private synthRain() {
+    const ac = this.ac, gain = this.rainGain;
+    if (!ac || !gain || !this.running) return;
+    const X = Math.floor(ac.sampleRate * 0.5); // crossfade tail
+    const N = Math.floor(ac.sampleRate * 10); // 10 s loop length
     const gen = new Float32Array(N + X);
     let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
     for (let i = 0; i < N + X; i++) {
@@ -85,7 +156,7 @@ export class RainEngine {
     }
     // blend gen[N..] (which continues gen[N-1]) into the head: constant power,
     // so out[N-1] → out[0] is continuous — no click, no audible loop cycle
-    const buf = this.ac.createBuffer(1, N, this.ac.sampleRate);
+    const buf = ac.createBuffer(1, N, ac.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < X; i++) {
       const t = (i / X) * (Math.PI / 2);
@@ -93,21 +164,21 @@ export class RainEngine {
     }
     data.set(gen.subarray(X, N), X);
 
-    const src = this.ac.createBufferSource();
+    const src = ac.createBufferSource();
     src.buffer = buf;
     src.loop = true;
-    const hp = this.ac.createBiquadFilter();
+    const hp = ac.createBiquadFilter();
     hp.type = "highpass";
     hp.frequency.value = 220;
-    const lp = this.ac.createBiquadFilter();
+    const lp = ac.createBiquadFilter();
     lp.type = "lowpass";
     lp.frequency.value = 5400;
-    this.rainGain = this.ac.createGain();
-    this.rainGain.gain.value = 0;
-    src.connect(hp).connect(lp).connect(this.rainGain).connect(this.master);
+    src.connect(hp).connect(lp).connect(gain);
     src.start();
+    this.rainSrc = src;
     // 1.2 s fade-in
-    this.rainGain.gain.linearRampToValueAtTime(0.32, this.ac.currentTime + 1.2);
+    gain.gain.setValueAtTime(0, ac.currentTime);
+    gain.gain.linearRampToValueAtTime(0.32, ac.currentTime + 1.2);
   }
 
   private thunder() {
@@ -248,6 +319,7 @@ export class RainEngine {
 
   stop() {
     this.running = false;
+    this.gen++; // any in-flight rain-bed load becomes stale
     window.removeEventListener("resize", this.resize);
     cancelAnimationFrame(this.raf);
     clearTimeout(this.lightningTimer);
@@ -255,6 +327,9 @@ export class RainEngine {
       this.rainGain.gain.cancelScheduledValues(this.ac.currentTime);
       this.rainGain.gain.linearRampToValueAtTime(0, this.ac.currentTime + 0.8);
     }
+    const src = this.rainSrc;
+    this.rainSrc = null;
+    if (src) window.setTimeout(() => { try { src.stop(); } catch {} }, 900);
     const ac = this.ac;
     if (ac) window.setTimeout(() => ac.close().catch(() => {}), 900);
     this.ac = null;
