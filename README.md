@@ -29,7 +29,7 @@ index.html            SEO meta, JSON-LD (WebSite + FAQPage), PWA/iOS tags, font 
 src/config.ts         ⚙️ EDIT HERE — playlist ID, UPI, WhatsApp links, quotes, chat backend
 src/index.css         🎨 EDIT HERE — all design tokens (@theme), glass system, animations
 src/lib/player.ts     YouTube radio engine (random start, silent preload, Media Session)
-src/lib/rain.ts       🌧️ Baarish: canvas rain + lightning + thunder (Web Audio)
+src/lib/rain.ts       🌧️ Baarish: canvas rain + lightning (Web Audio)
 src/lib/chat.ts       💬 Chat transport (local demo mode / Firebase REST) + helpers
 src/lib/utils.ts      Synthetic synced online counter, scroll reveal
 src/components/       Hero, Player, Chat, Rain, Overlays (modals), Sections (About/FAQ/Footer)
@@ -93,9 +93,9 @@ The bed is **`public/rain.mp3`** — *Calm Thunderstorm in the Jungle* (Mixkit, 
 licence), 49 s → 192 kbps stereo MP3, decoded and baked into a seamless mid-track
 loop (the loud −18 dB opening swell is skipped so every wrap stays body-level),
 1.5 s equal-power crossfade with a 1.2 s fade-in, through a soft limiter so the
-bed + thunder never clip. If the fetch/decode fails (first visit, offline) it falls
-back to a live pink-noise rain bed. **Thunder is still synthesized** (sawtooth
-80→25 Hz + noise crack) so every rumble lands right after its own lightning flash.
+bed never clips. If the fetch/decode fails (first visit, offline) it falls
+back to a live pink-noise rain bed. Lightning is visual only — flash + bolt,
+no synthesized thunder.
 
 ## PWA
 

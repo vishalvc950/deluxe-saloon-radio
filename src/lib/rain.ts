@@ -5,8 +5,8 @@
      equal-power crossfade), 1.2 s fade-in
    • if the fetch/decode fails (offline, first visit) it falls back to a
      live pink-noise 10 s loop → highpass 220 + lowpass 5400
-   • sawtooth 80→25 Hz + lowpass + noise crack = thunder
    • random lightning every 5–14 s: 3-stage screen flash + jagged bolt
+     (visual only — no synthesized thunder)
    ===================================================================== */
 
 interface Drop { x: number; y: number; len: number; speed: number; depth: number; }
@@ -70,7 +70,7 @@ export class RainEngine {
     this.ac = new AC();
     this.master = this.ac.createGain();
     this.master.gain.value = 1;
-    // soft limiter: rain bed + thunder can overlap and exceed 0 dBFS
+    // soft limiter so the bed never clips
     const lim = this.ac.createDynamicsCompressor();
     lim.threshold.value = -6;
     lim.knee.value = 6;
@@ -189,42 +189,6 @@ export class RainEngine {
     gain.gain.linearRampToValueAtTime(0.32, ac.currentTime + 1.2);
   }
 
-  private thunder() {
-    if (!this.ac || !this.master) return;
-    const t = this.ac.currentTime;
-    // deep sawtooth rumble 80 → 25 Hz
-    const osc = this.ac.createOscillator();
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(80, t);
-    osc.frequency.exponentialRampToValueAtTime(25, t + 1.1);
-    const lp = this.ac.createBiquadFilter();
-    lp.type = "lowpass";
-    lp.frequency.setValueAtTime(420, t);
-    lp.frequency.exponentialRampToValueAtTime(90, t + 1.2);
-    const g = this.ac.createGain();
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.85, t + 0.06);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
-    osc.connect(lp).connect(g).connect(this.master);
-    osc.start(t);
-    osc.stop(t + 1.7);
-
-    // crack: short noise burst
-    const n = this.ac.createBufferSource();
-    const nb = this.ac.createBuffer(1, this.ac.sampleRate * 0.4, this.ac.sampleRate);
-    const nd = nb.getChannelData(0);
-    for (let i = 0; i < nd.length; i++) nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
-    n.buffer = nb;
-    const bp = this.ac.createBiquadFilter();
-    bp.type = "bandpass";
-    bp.frequency.value = 1800;
-    const ng = this.ac.createGain();
-    ng.gain.setValueAtTime(0.5, t);
-    ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-    n.connect(bp).connect(ng).connect(this.master);
-    n.start(t);
-  }
-
   /* ---------- lightning ---------- */
   private scheduleLightning() {
     if (!this.running) return;
@@ -252,8 +216,6 @@ export class RainEngine {
       }
       this.bolts.push({ pts, a: 1 });
     }
-    // thunder arrives a beat after the flash
-    window.setTimeout(() => this.thunder(), 180 + Math.random() * 700);
     this.scheduleLightning();
   }
 
