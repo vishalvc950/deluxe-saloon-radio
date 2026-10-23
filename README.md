@@ -34,7 +34,7 @@ src/lib/chat.ts       💬 Chat transport (local demo mode / Firebase REST) + he
 src/lib/utils.ts      Synthetic synced online counter, scroll reveal
 src/components/       Hero, Player, Chat, Rain, Overlays (modals), Sections (About/FAQ/Footer)
 public/themes.json    Scene switcher data (Saloon, Bus Driver, Bhojpuri, Bartan Time, …)
-public/rain.mp3       🌧️ thunderstorm bed for the Baarish toggle (~690 KB, Mixkit CC0)
+public/rain.mp3       🌧️ thunderstorm bed for the Baarish toggle (~1.2 MB, Mixkit CC0)
 public/manifest.json  PWA manifest · public/sw.js service worker (precache + smart caching)
 src/assets/           🖼️ EDIT HERE — hero-desktop.jpg / hero-mobile.jpg / icon-512.png
 ```
@@ -90,8 +90,9 @@ open and **20 s** in the background for the unread badge — no SDKs, no websock
 The rain toggle runs a full-viewport canvas (≤300 depth-sorted drops, wind, splashes)
 plus random lightning every 5–14 s with a 3-stage screen flash and a glowing bolt.
 The bed is **`public/rain.mp3`** — *Calm Thunderstorm in the Jungle* (Mixkit, free
-licence), 49 s → 112 kbps stereo MP3, decoded and baked into a seamless
-1.5 s equal-power crossfade loop with a 1.2 s fade-in, through a soft limiter so the
+licence), 49 s → 192 kbps stereo MP3, decoded and baked into a seamless mid-track
+loop (the loud −18 dB opening swell is skipped so every wrap stays body-level),
+1.5 s equal-power crossfade with a 1.2 s fade-in, through a soft limiter so the
 bed + thunder never clip. If the fetch/decode fails (first visit, offline) it falls
 back to a live pink-noise rain bed. **Thunder is still synthesized** (sawtooth
 80→25 Hz + noise crack) so every rumble lands right after its own lightning flash.

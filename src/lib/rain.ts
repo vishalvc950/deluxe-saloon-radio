@@ -1,7 +1,8 @@
 /* =====================================================================
    🌧️ BAARISH ENGINE — canvas rain + lightning, Web Audio.
    • rain bed = public/rain.mp3 (Mixkit thunderstorm), fetched + decoded,
-     baked into a seamless 1.5 s equal-power crossfade loop, 1.2 s fade-in
+     baked into a seamless mid-track loop (loud opening skipped, 1.5 s
+     equal-power crossfade), 1.2 s fade-in
    • if the fetch/decode fails (offline, first visit) it falls back to a
      live pink-noise 10 s loop → highpass 220 + lowpass 5400
    • sawtooth 80→25 Hz + lowpass + noise crack = thunder
@@ -107,20 +108,27 @@ export class RainEngine {
       src.connect(this.rainGain);
       src.start();
       this.rainSrc = src;
-      // 1.2 s fade-in
+      // 1.2 s fade-in (0.72: body-level window, loud opening no longer boosts the average)
       this.rainGain.gain.setValueAtTime(0, this.ac.currentTime);
-      this.rainGain.gain.linearRampToValueAtTime(0.6, this.ac.currentTime + 1.2);
+      this.rainGain.gain.linearRampToValueAtTime(0.72, this.ac.currentTime + 1.2);
       return true;
     } catch {
       return false;
     }
   }
 
-  /* bake a seamless loop: the tail (crossfade window) is blended into the
-     head at constant power, so out[L-1] → out[0] stays sample-continuous */
+  /* bake a seamless loop from a mid-track window. The bed opens with a loud
+     swell (0–4 s ≈ −18 dB vs ≈ −31 dB body), so wrapping the full file surges
+     ~13 dB into the limiter at every loop → audible weirdness at the seam.
+     Skip the opening + the trailing encoder flush, then blend the window's
+     tail into its head at constant power: out[L-1] → out[0] stays
+     sample-continuous, with matched energy on both sides of the seam */
   private seamlessLoop(raw: AudioBuffer, ac: AudioContext): AudioBuffer {
-    const X = Math.floor(raw.sampleRate * 1.5); // crossfade tail
-    const L = raw.length - X;
+    const sr = raw.sampleRate;
+    const X = Math.floor(sr * 1.5); // crossfade tail
+    const skip = Math.min(Math.floor(sr * 6), Math.floor(raw.length * 0.15));
+    const end = raw.length - Math.floor(sr * 0.5);
+    const L = end - X - skip;
     if (L <= X) return raw;
     const out = ac.createBuffer(raw.numberOfChannels, L, raw.sampleRate);
     for (let ch = 0; ch < raw.numberOfChannels; ch++) {
@@ -128,9 +136,9 @@ export class RainEngine {
       const o = out.getChannelData(ch);
       for (let i = 0; i < X; i++) {
         const t = (i / X) * (Math.PI / 2);
-        o[i] = d[L + i] * Math.cos(t) + d[i] * Math.sin(t);
+        o[i] = d[skip + L + i] * Math.cos(t) + d[skip + i] * Math.sin(t);
       }
-      o.set(d.subarray(X, L), X);
+      o.set(d.subarray(skip + X, skip + L), X);
     }
     return out;
   }
